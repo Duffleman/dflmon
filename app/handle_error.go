@@ -25,6 +25,8 @@ func (a *App) HandleError(err JobWrap) error {
 		switchTo = sdk.ComponentStatusPartialOutage
 	case dflmon.ErrPerformanceIssue:
 		switchTo = sdk.ComponentStatusPerformanceIssues
+	case dflmon.ErrUnknownState:
+		switchTo = sdk.ComponentStatusUnknown
 	default:
 		return errors.New("unknown error receiver")
 	}
