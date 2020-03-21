@@ -2,6 +2,7 @@ package app
 
 import (
 	"strings"
+	"time"
 
 	"dflmon"
 	"dflmon/config"
@@ -11,7 +12,8 @@ import (
 )
 
 const PacketsToSend = 2
-const TimeoutInSeconds = 5
+const Timeout = 15 * time.Second
+const Interval = 5 * time.Millisecond
 
 func (a *App) doICMP(job *config.Job) error {
 	pinger, err := ping.NewPinger(job.Host)
@@ -26,30 +28,33 @@ func (a *App) doICMP(job *config.Job) error {
 	pinger.SetPrivileged(true)
 
 	pinger.Count = PacketsToSend
-	pinger.Timeout = TimeoutInSeconds
+	pinger.Timeout = Timeout
+	pinger.Interval = Interval
 
 	pinger.Run()
 
 	stats := pinger.Statistics()
 
+	l := log.WithFields(log.Fields{
+		"stats": stats,
+	})
+
 	switch {
 	// no packets returned
 	case stats.PacketsRecv == 0:
-		log.Infof("cannot ping host %s", job.Host)
+		l.Infof("cannot ping host %s", job.Host)
 		return dflmon.ErrMajorOutage
 	// some packets returned
 	case stats.PacketsRecv < stats.PacketsSent:
-		log.Infof("packet loss on host %s", job.Host)
+		l.Infof("packet loss on host %s", job.Host)
 		return dflmon.ErrPartialOutage
 	// all packets retured
 	case stats.PacketsRecv == stats.PacketsSent:
-		log.Infof("successfully pinged host %s", job.Host)
+		l.Infof("successfully pinged host %s", job.Host)
 		return nil
 	}
 
-	log.WithFields(log.Fields{
-		"stats": stats,
-	}).Warnf("unknown state found")
+	l.Warnf("unknown state found")
 
 	return dflmon.ErrUnknownState
 }
