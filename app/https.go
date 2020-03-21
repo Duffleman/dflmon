@@ -10,22 +10,33 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (a *App) doHTTPS(job *config.Job) error {
+func (a *App) doHTTPS(job *config.Job, validate bool) error {
 	url := fmt.Sprintf("https://%s", job.Host)
 
-	res, err := a.Client.Get(url)
+	c := a.Client
+
+	if validate == false {
+		c = a.ClientNoValidate
+	}
+
+	res, err := c.Get(url)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such host") {
 			log.Warnf("no such host, configuration error for host %s", job.Host)
 		}
 
-		log.Infof("cannot connect to host %s", job.Host)
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Infof("cannot connect to host %s", job.Host)
 
 		return dflmon.ErrMajorOutage
 	}
 
 	if res.StatusCode > 400 {
-		log.Infof("cannot connect to host %s", job.Host)
+		log.WithFields(log.Fields{
+			"statusCode": res.StatusCode,
+			"status":     res.Status,
+		}).Infof("cannot connect to host %s", job.Host)
 		return dflmon.ErrMajorOutage
 	}
 

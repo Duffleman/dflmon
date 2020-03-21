@@ -44,18 +44,22 @@ func (a *App) StartWorkers() error {
 func (a *App) StartWorker(wg *sync.WaitGroup, errCh chan JobWrap, job *config.Job) {
 	defer wg.Done()
 
+	var err error
+
 	for {
 		switch job.Type {
 		case "icmp":
-			err := a.doICMP(job)
-			errCh <- JobWrap{*job, err}
+			err = a.doICMP(job)
 		case "https":
-			err := a.doHTTPS(job)
-			errCh <- JobWrap{*job, err}
+			err = a.doHTTPS(job, true)
+		case "https-novalidate":
+			err = a.doHTTPS(job, false)
 		default:
 			log.Warnf("job type not implemented %s", job.Type)
 			return
 		}
+
+		errCh <- JobWrap{*job, err}
 
 		time.Sleep(job.Interval * time.Second)
 	}

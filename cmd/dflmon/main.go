@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -50,16 +51,28 @@ func main() {
 		return
 	}
 
-	tr := &http.Transport{
-		MaxIdleConns:    10,
-		IdleConnTimeout: 5 * time.Second,
+	client := &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConns:    10,
+			IdleConnTimeout: 5 * time.Second,
+		},
 	}
-	client := &http.Client{Transport: tr}
+
+	clientNoValidate := &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConns:    10,
+			IdleConnTimeout: 5 * time.Second,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 
 	app := &app.App{
-		Client: client,
-		Config: config,
-		Cachet: &cachet.Client{cachetClient},
+		Client:           client,
+		ClientNoValidate: clientNoValidate,
+		Config:           config,
+		Cachet:           &cachet.Client{cachetClient},
 	}
 
 	log.Info("syncing jobs with cachet components")

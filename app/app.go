@@ -8,9 +8,10 @@ import (
 )
 
 type App struct {
-	Client *http.Client
-	Config *config.Config
-	Cachet *cachet.Client
+	Client           *http.Client
+	ClientNoValidate *http.Client
+	Config           *config.Config
+	Cachet           *cachet.Client
 }
 
 func (a *App) SyncWithCachet() error {

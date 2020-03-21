@@ -42,11 +42,9 @@ func (a *App) doICMP(job *config.Job) error {
 		return dflmon.ErrMajorOutage
 	}
 
-	log.
-		WithFields(log.Fields{
-			"stats": stats,
-		}).
-		Warnf("unknown state found")
+	log.WithFields(log.Fields{
+		"stats": stats,
+	}).Warnf("unknown state found")
 
 	return dflmon.ErrPartialOutage
 }
