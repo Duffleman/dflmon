@@ -22,6 +22,8 @@ func (a *App) doICMP(job *config.Job) error {
 		return dflmon.ErrMajorOutage
 	}
 
+	pinger.SetPrivileged(true)
+
 	pinger.Count = PacketsToSend
 
 	pinger.Run()
@@ -40,7 +42,11 @@ func (a *App) doICMP(job *config.Job) error {
 		return dflmon.ErrMajorOutage
 	}
 
-	log.Warnf("unknown state found")
+	log.
+		WithFields(log.Fields{
+			"stats": stats,
+		}).
+		Warnf("unknown state found")
 
 	return dflmon.ErrPartialOutage
 }
