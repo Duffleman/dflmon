@@ -21,9 +21,14 @@ func initViper() {
 	viper.AutomaticEnv()
 
 	viper.SetDefault("CACHET_URL", "https://status.dfl.mn")
+	viper.SetDefault("DEBUG", "true")
 }
 
 func main() {
+	if viper.GetString("DEBUG") == "false" {
+		log.SetLevel(log.WarnLevel)
+	}
+
 	log.Info("app launch")
 
 	initViper()
