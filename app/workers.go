@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	MaxRand = 5
-	MinRand = 1
+	MaxRand = 10
+	MinRand = 2
 )
 
 type JobWrap struct {
