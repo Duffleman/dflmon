@@ -32,7 +32,7 @@ func (a *App) doHTTPS(job *config.Job, validate bool) error {
 		return dflmon.ErrMajorOutage
 	}
 
-	if res.StatusCode > 400 {
+	if res.StatusCode >= 400 {
 		log.WithFields(log.Fields{
 			"statusCode": res.StatusCode,
 			"status":     res.Status,
