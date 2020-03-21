@@ -25,13 +25,9 @@ func initViper() {
 }
 
 func main() {
-	if viper.GetString("DEBUG") == "false" {
-		log.SetLevel(log.WarnLevel)
-	}
+	initViper()
 
 	log.Info("app launch")
-
-	initViper()
 
 	cachetClient, err := cachetSDK.NewClient(viper.GetString("CACHET_URL"), nil)
 	if err != nil {
@@ -92,6 +88,14 @@ func main() {
 	}
 
 	log.Info("starting workers")
+
+	if viper.GetString("DEBUG") == "false" {
+		log.Info("setting debug OFF")
+
+		log.SetLevel(log.WarnLevel)
+	}
+
+	log.Info("setting debug ON")
 
 	err = app.StartWorkers()
 	if err != nil {
