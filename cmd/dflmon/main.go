@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"time"
 
@@ -53,15 +54,17 @@ func main() {
 
 	client := &http.Client{
 		Transport: &http.Transport{
-			MaxIdleConns:    10,
-			IdleConnTimeout: 5 * time.Second,
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).Dial,
 		},
 	}
 
 	clientNoValidate := &http.Client{
 		Transport: &http.Transport{
-			MaxIdleConns:    10,
-			IdleConnTimeout: 5 * time.Second,
+			Dial: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).Dial,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
