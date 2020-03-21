@@ -11,6 +11,7 @@ import (
 )
 
 const PacketsToSend = 2
+const TimeoutInSeconds = 5
 
 func (a *App) doICMP(job *config.Job) error {
 	pinger, err := ping.NewPinger(job.Host)
@@ -25,6 +26,7 @@ func (a *App) doICMP(job *config.Job) error {
 	pinger.SetPrivileged(true)
 
 	pinger.Count = PacketsToSend
+	pinger.Timeout = TimeoutInSeconds
 
 	pinger.Run()
 
