@@ -7,28 +7,10 @@ import (
 	"dflmon/config"
 )
 
+// App is a struct for the app methods to attach to
 type App struct {
 	Client           *http.Client
 	ClientNoValidate *http.Client
 	Config           *config.Config
 	Cachet           *cachet.Client
-}
-
-func (a *App) SyncWithCachet() error {
-	components, err := a.Cachet.ListAllComponents()
-	if err != nil {
-		return err
-	}
-
-OUT:
-	for _, job := range a.Config.Jobs {
-		for _, component := range components {
-			if component.Name == job.ComponentName {
-				job.ComponentID = component.ID
-				continue OUT
-			}
-		}
-	}
-
-	return nil
 }

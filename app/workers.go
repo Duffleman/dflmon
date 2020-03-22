@@ -11,26 +11,29 @@ import (
 )
 
 var (
+	// MaxRand is the maximum time to wait before starting a job
 	MaxRand = 10
+	// MinRand is the minimum time to wait before starting a job
 	MinRand = 2
 )
 
-type JobWrap struct {
-	Job config.Job
-	Err error
+type jobWrap struct {
+	Job     config.Job
+	Outcome int
 }
 
+// StartWorkers starts all workers, 1 per job
 func (a *App) StartWorkers() error {
 	wg := &sync.WaitGroup{}
 
-	errCh := make(chan JobWrap)
+	jobCh := make(chan jobWrap)
 
-	go a.MessageHandlerWorker(errCh)
+	go a.messageHandlerWorker(jobCh)
 
 	for i, job := range a.Config.Jobs {
 		log.Infof("starting worker %d/%d", i+1, len(a.Config.Jobs))
 		wg.Add(1)
-		go a.StartWorker(wg, errCh, job)
+		go a.startWorker(wg, jobCh, job)
 		wait := time.Duration(rand.Intn((MaxRand - MinRand) + MinRand))
 		log.Infof("waiting for %d seconds", wait)
 		time.Sleep(wait * time.Second)
@@ -41,25 +44,25 @@ func (a *App) StartWorkers() error {
 	return nil
 }
 
-func (a *App) StartWorker(wg *sync.WaitGroup, errCh chan JobWrap, job *config.Job) {
+func (a *App) startWorker(wg *sync.WaitGroup, jobCh chan jobWrap, job *config.Job) {
 	defer wg.Done()
 
-	var err error
+	var outcome int
 
 	for {
 		switch job.Type {
 		case "icmp":
-			err = a.doICMP(job)
+			outcome = a.doICMP(job)
 		case "https":
-			err = a.doHTTPS(job, true)
+			outcome = a.doHTTPS(job, true)
 		case "https-novalidate":
-			err = a.doHTTPS(job, false)
+			outcome = a.doHTTPS(job, false)
 		default:
 			log.Warnf("job type not implemented %s", job.Type)
 			return
 		}
 
-		errCh <- JobWrap{*job, err}
+		jobCh <- jobWrap{*job, outcome}
 
 		time.Sleep(job.Interval * time.Second)
 	}

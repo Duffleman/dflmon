@@ -3,35 +3,34 @@ package app
 import (
 	"fmt"
 
+	sdk "github.com/andygrunwald/cachet"
 	log "github.com/sirupsen/logrus"
 )
 
-func (a *App) HandleMessage(err JobWrap) {
-	var newErr error
-
-	if err.Err == nil {
-		newErr = a.HandleSuccess(err.Job)
-		if newErr != nil {
-			log.Warn(fmt.Errorf("cannot update component %s: %w", err.Job.Name, newErr))
-		}
+func (a *App) handleMessage(jw jobWrap) {
+	if jw.Job.ComponentID == 0 {
+		log.Warnf("cannot update component %s, no matched catchet component", jw.Job.Name)
 		return
 	}
 
-	newErr = a.HandleError(err)
-	if newErr != nil {
-		log.Warn(fmt.Errorf("cannot update component %s: %w", err.Job.Name, newErr))
+	_, _, err := a.Cachet.Components.Update(jw.Job.ComponentID, &sdk.Component{
+		Status: jw.Outcome,
+	})
+	if err != nil {
+		log.Warn(fmt.Errorf("cannot update component %s: %w", jw.Job.ComponentName, err))
+		return
 	}
 }
 
-func (a *App) MessageHandlerWorker(ch chan JobWrap) {
+func (a *App) messageHandlerWorker(ch chan jobWrap) {
 	for {
 		select {
-		case err, ok := <-ch:
+		case jw, ok := <-ch:
 			if !ok {
 				return
 			}
 
-			a.HandleMessage(err)
+			a.handleMessage(jw)
 		}
 	}
 }

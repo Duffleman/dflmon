@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"dflmon"
 	"dflmon/config"
 
+	sdk "github.com/andygrunwald/cachet"
 	log "github.com/sirupsen/logrus"
 )
 
-func (a *App) doHTTPS(job *config.Job, validate bool) error {
+func (a *App) doHTTPS(job *config.Job, validate bool) int {
 	url := fmt.Sprintf("https://%s", job.Host)
 
 	c := a.Client
@@ -29,18 +29,21 @@ func (a *App) doHTTPS(job *config.Job, validate bool) error {
 			"error": err,
 		}).Infof("cannot connect to host %s", job.Host)
 
-		return dflmon.ErrMajorOutage
+		return sdk.ComponentStatusMajorOutage
 	}
+
+	l := log.WithFields(log.Fields{
+		"statusCode": res.StatusCode,
+		"status":     res.Status,
+	})
 
 	if res.StatusCode >= 400 {
-		log.WithFields(log.Fields{
-			"statusCode": res.StatusCode,
-			"status":     res.Status,
-		}).Infof("cannot connect to host %s", job.Host)
-		return dflmon.ErrMajorOutage
+		l.Infof("cannot connect to host %s", job.Host)
+
+		return sdk.ComponentStatusMajorOutage
 	}
 
-	log.Infof("successfully connected to host %s", job.Host)
+	l.Infof("successfully connected to host %s", job.Host)
 
-	return nil
+	return sdk.ComponentStatusOperational
 }
