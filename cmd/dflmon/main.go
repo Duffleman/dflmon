@@ -93,9 +93,9 @@ func main() {
 		log.Info("setting debug OFF")
 
 		log.SetLevel(log.WarnLevel)
+	} else {
+		log.Info("setting debug ON")
 	}
-
-	log.Info("setting debug ON")
 
 	err = app.StartWorkers()
 	if err != nil {
