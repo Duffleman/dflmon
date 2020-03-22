@@ -39,3 +39,4 @@ So far only these two forms are supported:
 
 - icmp
 - https
+- https-novalidate
