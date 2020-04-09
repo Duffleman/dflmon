@@ -57,6 +57,8 @@ func (a *App) startWorker(wg *sync.WaitGroup, jobCh chan jobWrap, job *config.Jo
 			outcome = a.doHTTPS(job, true)
 		case "https-novalidate":
 			outcome = a.doHTTPS(job, false)
+		case "tcp":
+			outcome = a.doTCP(job)
 		default:
 			log.Warnf("job type not implemented %s", job.Type)
 			return
