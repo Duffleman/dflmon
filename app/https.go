@@ -10,6 +10,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var allowedCodes = map[int]struct{}{
+	200: struct{}{},
+	204: struct{}{},
+	302: struct{}{},
+	401: struct{}{},
+}
+
 func (a *App) doHTTPS(job *config.Job, validate bool) int {
 	url := fmt.Sprintf("https://%s", job.Host)
 
@@ -37,7 +44,7 @@ func (a *App) doHTTPS(job *config.Job, validate bool) int {
 		"status":     res.Status,
 	})
 
-	if res.StatusCode >= 400 {
+	if _, ok := allowedCodes[res.StatusCode]; !ok {
 		l.Infof("cannot connect to host %s", job.Host)
 
 		return sdk.ComponentStatusMajorOutage
