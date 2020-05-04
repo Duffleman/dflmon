@@ -11,10 +11,9 @@ import (
 )
 
 var allowedCodes = map[int]struct{}{
-	200: struct{}{},
-	204: struct{}{},
-	302: struct{}{},
-	401: struct{}{},
+	200: {},
+	204: {},
+	302: {},
 }
 
 func (a *App) doHTTPS(job *config.Job, validate bool) int {
