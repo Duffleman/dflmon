@@ -57,6 +57,8 @@ func (a *App) startWorker(wg *sync.WaitGroup, jobCh chan jobWrap, job *config.Jo
 			outcome = a.doHTTPS(job, true)
 		case "https-novalidate":
 			outcome = a.doHTTPS(job, false)
+		case "http":
+			outcome = a.doHTTP(job, true)
 		case "tcp":
 			outcome = a.doTCP(job)
 		default:

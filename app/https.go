@@ -17,7 +17,15 @@ var allowedCodes = map[int]struct{}{
 }
 
 func (a *App) doHTTPS(job *config.Job, validate bool) int {
-	url := fmt.Sprintf("https://%s", job.Host)
+	return a.doWeb(job, "https", validate)
+}
+
+func (a *App) doHTTP(job *config.Job, validate bool) int {
+	return a.doWeb(job, "http", validate)
+}
+
+func (a *App) doWeb(job *config.Job, schema string, validate bool) int {
+	url := fmt.Sprintf("%s://%s", schema, job.Host)
 
 	c := a.Client
 
